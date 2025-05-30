@@ -1,0 +1,15 @@
+﻿@model List<ParkingApp.Data.Models.Parking>
+
+
+
+@foreach (var parking in Model)
+{
+    <a href="@Url.Action("Details", "Parking", new { id = parking.Id })" class="btn btn-dark w-100 mb-2 text-left parking-btn">
+        <div class="d-flex justify-content-between w-100">
+            <span>@parking.Location</span>
+            <span>@parking.Subscribers.Count/@parking.Capacity</span>
+        </div>
+    </a>
+}
+
+<a href="@Url.Action("AddParking", "Home")" class="btn btn-secondary add-btn">+</a>

@@ -1,0 +1,24 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    <h2 style="text-align: center; color: #2c3e50;">Добави нов паркинг</h2>
+    <form method="post" action="/Home/AddParking">
+        <div style="margin-bottom: 15px;">
+            <label for="name" style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Име / Локация</label>
+            <input type="text" id="name" name="name" placeholder="Локация на паркингили името" required
+                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="capacity" style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Места</label>
+            <input type="number" id="capacity" name="capacity" placeholder="Места в паркинга" required min="1"
+                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+        </div>
+        <div style="text-align: center;">
+            <button type="submit" style="background-color: #1abc9c; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
+                Добави паркинг
+            </button>
+        </div>
+    </form>
+</div>

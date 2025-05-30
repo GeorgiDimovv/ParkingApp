@@ -1,0 +1,65 @@
+﻿@model ParkingApp.Data.Models.Subscriber
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    <h2 style="text-align: center; color: #2c3e50;">Направи промени</h2>
+    <form method="post" action="/Parking/EditSubscriber">
+        <input type="hidden" name="parkingId" value="@ViewBag.ParkingId" />
+        <input type="hidden" name="subscriberId" value="@Model.Id" />
+
+        <div style="margin-bottom: 15px;">
+            <label for="name" style="font-weight: bold;">Име</label>
+            <input type="text" id="name" name="name" required value="@Model.Name"
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="phoneNumbers" style="font-weight: bold;">Телефонен номер</label>
+            <input type="text" id="phoneNumbers" name="phoneNumbers" required value="@string.Join(", ", Model.PhoneNumber)"
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="email" style="font-weight: bold;">Имейл</label>
+            <input type="text" id="email" name="email" required value="@Model.EmailAddress"
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="spots" style="font-weight: bold;">Места</label>
+            <input type="text" id="spots" name="spots" required value="@string.Join(", ", Model.ParkingSpots)"
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="barrierPhoneNumbers" style="font-weight: bold;">Телефонни бариери</label>
+            <input type="text" id="barrierPhoneNumbers" name="barrierPhoneNumbers" required value="@string.Join(", ", Model.BarrierPhoneNumbers)"
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="paymentMethod" style="font-weight: bold;">Начин на плащане</label>
+            <select id="paymentMethod" name="paymentMethod" required
+                    style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+                <option value="Банка" selected="@(Model.PaymentMethod == ParkingApp.Data.Enum.PaymentMethod.Bank)">Bank</option>
+                <option value="В Кеш" selected="@(Model.PaymentMethod == ParkingApp.Data.Enum.PaymentMethod.Cash)">Cash</option>
+                <option value="Revolut" selected="@(Model.PaymentMethod == ParkingApp.Data.Enum.PaymentMethod.Revolut)">Revolut</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="priceInBgn" style="font-weight: bold;">Цена в левове</label>
+            <input type="number" id="priceInBgn" name="priceInBgn" required min="0" value="@Model.PriceInBgn"
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+        </div>
+
+        <div style="text-align: center;">
+            <button type="submit" style="background-color: #1abc9c; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
+                Запази
+            </button>
+        </div>
+    </form>
+</div>

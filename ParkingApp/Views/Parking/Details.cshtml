@@ -1,0 +1,63 @@
+﻿@model ParkingApp.Data.Models.Parking
+
+<h2>@Model.Location Абонати</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Име</th>
+            <th>Телефонен номер</th>
+            <th>Имейл</th>
+            <th>Места</th>
+            <th>Телефонни номера за бариерата</th>
+            <th>Плащане</th>
+            <th>Обща сума в левове</th>
+            <th>Платен</th>
+            <th>Месеци Платени</th>
+            <th>Цена</th>
+            <th>Edit</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var sub in Model.Subscribers)
+        {
+            <tr>
+                <td>@sub.Name</td>
+                <td>@string.Join(", ", sub.PhoneNumber)</td>
+                <td>@sub.EmailAddress</td>
+                <td>@string.Join(", ", sub.ParkingSpots)</td>
+                <td>@string.Join(", ", sub.BarrierPhoneNumbers)</td>
+                <td>@sub.PaymentMethod</td>
+                <td>@sub.TotalPriceInBgn</td>
+                <td>
+                    <form method="post" asp-action="TogglePaid" asp-controller="Parking" style="display:inline;">
+                        <input type="hidden" name="subscriberId" value="@sub.Id" />
+                        <input type="hidden" name="parkingId" value="@Model.Id" />
+                        <button type="submit"
+                                style="width: 20px; height: 20px; border: 1px solid #ccc; border-radius: 3px; background-color:@(sub.Paid ? "#1abc9c" : "#fff"); cursor: pointer; transition: background-color 0.3s ease;"
+                                onmouseover="this.style.backgroundColor = '#16a085';"
+                                onmouseout="this.style.backgroundColor = '@(sub.Paid ? "#1abc9c" : "#fff")';">
+                        </button>
+                    </form>
+                </td>
+                <td>@sub.MonthsPaidAhead</td>
+                <td>@sub.PriceInBgn</td>
+                <td>
+                    <a href="@Url.Action("EditSubscriber", "Parking", new { parkingId = Model.Id, subscriberId = sub.Id })"
+                       style="background-color: #1abc9c; color: #fff; padding: 5px 15px; border: none; border-radius: 5px; font-size: 14px; text-decoration: none; transition: background-color 0.3s ease;"
+                       onmouseover="this.style.backgroundColor='#16a085';"
+                       onmouseout="this.style.backgroundColor='#1abc9c';">
+                        Edit
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("AddSubscriber", "Parking", new { parkingId = Model.Id })"
+   style="background-color: #1abc9c; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; text-decoration: none; transition: background-color 0.3s ease;"
+   onmouseover="this.style.backgroundColor='#16a085';"
+   onmouseout="this.style.backgroundColor='#1abc9c';">
+    Add Subscriber
+</a>

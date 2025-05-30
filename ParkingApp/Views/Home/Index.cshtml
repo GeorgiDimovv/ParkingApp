@@ -1,0 +1,74 @@
+﻿@model List<ParkingApp.Models.ParkingSummaryViewModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Информация за паркинги</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Локация/Паркинг</th>
+            <th>Места</th>
+            <th>Взети места</th>
+            <th>Свободни места</th>
+            <th>Платени места</th>
+            <th>Обща сума в левове</th>
+            <th>Имейли Изпратени</th>
+            <th>Време до следващият месец</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ParkingLocation</td>
+                <td>@item.TotalSpots</td>
+                <td>@item.SpotsTaken</td>
+                <td>@item.SpotsAvailable</td>
+                <td>@item.SpotsPaid</td>
+                <td>@item.TotalIncome</td>
+                <td>
+                    <span style="color:@(item.EmailSentThisMonth ? "green" : "red"); font-weight:bold;">
+                        @(item.EmailSentThisMonth ? "Yes" : "No")
+                    </span>
+                </td>
+                <td>
+                    <span class="countdown" data-target="@item.NextEmailCycleTime.ToString("o")">
+                        calculating...
+                    </span>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        function updateCountdowns() {
+            const elements = document.querySelectorAll('.countdown');
+            const now = new Date();
+
+            elements.forEach(el => {
+                const target = new Date(el.dataset.target);
+                const diff = target - now;
+
+                if (diff <= 0) {
+                    el.textContent = "Sent this month";
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((diff / (1000 * 60)) % 60);
+                const seconds = Math.floor((diff / 1000) % 60);
+
+                el.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+            });
+        }
+
+        setInterval(updateCountdowns, 1000);
+        updateCountdowns(); // initial run
+    </script>
+}

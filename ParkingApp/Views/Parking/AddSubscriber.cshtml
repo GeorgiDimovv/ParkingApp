@@ -1,0 +1,58 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    <h2 style="text-align: center; color: #2c3e50;">Добави абонат</h2>
+    <form method="post" action="/Parking/AddSubscriber">
+        <input type="hidden" name="parkingId" value="@ViewBag.ParkingId" />
+
+        <div style="margin-bottom: 15px;">
+            <label for="name" style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Име</label>
+            <input type="text" id="name" name="name" placeholder="Име на абонат" required
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="phoneNumbers" style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Телефонен номер</label>
+            <input type="text" id="phoneNumbers" name="phoneNumbers" placeholder="Телефонни номер на абоната (разделени със запетая)" required
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="email" style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Имейл</label>
+            <input type="text" id="email" name="email" placeholder="Имейл на абонат" required
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="spots" style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Места</label>
+            <input type="text" id="spots" name="spots" placeholder="Места на абонат (разделени със запетая)" required
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="barrierPhoneNumbers" style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Телефонни номера бариера</label>
+            <input type="text" id="barrierPhoneNumbers" name="barrierPhoneNumbers" placeholder="Телефонни номера за бариерата" required
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="paymentMethod" style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Плащане</label>
+            <select id="paymentMethod" name="paymentMethod" required
+                    style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+                <option value="" disabled selected>Начин на плащане</option>
+                <option value="Bank">Банка</option>
+                <option value="Cash">В кеш</option>
+                <option value="Revolut">Revolut</option>
+            </select>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="priceInBgn" style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Цена в левове</label>
+            <input type="number" id="priceInBgn" name="priceInBgn" placeholder="Цена в левове" required min="0"
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+        </div>
+
+        <div style="text-align: center;">
+            <button type="submit" style="background-color: #1abc9c; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
+                Добави абонат
+            </button>
+        </div>
+    </form>
+
+</div>
