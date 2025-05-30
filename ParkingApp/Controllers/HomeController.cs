@@ -31,6 +31,7 @@ namespace ParkingApp.Controllers
 
             var summaries = parkingData.Select(p => new ParkingSummaryViewModel
             {
+                ParkingId = p.Id,
                 ParkingLocation = p.Location,
                 TotalSpots = p.Capacity,
                 SpotsTaken = p.Subscribers.Sum(s => s.ParkingSpots.Count),
@@ -41,14 +42,6 @@ namespace ParkingApp.Controllers
             }).ToList();
 
             return View(summaries);
-        }
-
-
-        private TimeSpan GetTimeUntilNextCycle()
-        {
-            var now = DateTime.Now;
-            var next = new DateTime(now.Year, now.Month, 1, 8, 0, 0).AddMonths(1);
-            return next - now;
         }
 
         public IActionResult Startup()
@@ -93,6 +86,26 @@ namespace ParkingApp.Controllers
 
             return View();
         }
+
+        [HttpPost]
+        public IActionResult DeleteParking(int id)
+        {
+            var parking = _dbContext.Parkings
+                .Include(p => p.Subscribers)
+                .FirstOrDefault(p => p.Id == id);
+
+            if (parking != null)
+            {
+
+                _dbContext.Subscribers.RemoveRange(parking.Subscribers);
+                _dbContext.Parkings.Remove(parking);
+                _dbContext.SaveChanges();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+
 
 
 

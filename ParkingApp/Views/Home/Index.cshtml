@@ -30,7 +30,7 @@
                 <td>@item.TotalIncome</td>
                 <td>
                     <span style="color:@(item.EmailSentThisMonth ? "green" : "red"); font-weight:bold;">
-                        @(item.EmailSentThisMonth ? "Yes" : "No")
+                        @(item.EmailSentThisMonth ? "Да" : "Не")
                     </span>
                 </td>
                 <td>
@@ -39,6 +39,19 @@
                     </span>
                 </td>
 
+                <td>
+                    <form method="post"
+                          asp-action="DeleteParking"
+                          asp-controller="Home"
+                          onsubmit="return confirm('Сигурни ли сте ,че искате да премахнете този паркинг и всички негови абонати?');"
+                          style="display:inline;">
+                        <input type="hidden" name="id" value="@item.ParkingId" />
+                        <button type="submit"
+                                style="width: 90px; background-color: #e74c3c; color: #fff; padding: 5px 0; border: none; border-radius: 5px; font-size: 14px;">
+                            Изтрии
+                        </button>
+                    </form>
+                </td>
             </tr>
         }
     </tbody>

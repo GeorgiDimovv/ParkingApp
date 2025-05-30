@@ -77,6 +77,23 @@ namespace ParkingApp.Controllers
         }
 
         [HttpPost]
+        public IActionResult DeleteSubscriber(int subscriberId, int parkingId)
+        {
+            var subscriber = _DbContext.Subscribers
+                .FirstOrDefault(s => s.Id == subscriberId);
+
+            if (subscriber != null)
+            {
+                _DbContext.Subscribers.Remove(subscriber);
+                _DbContext.SaveChanges();
+            }
+
+            return RedirectToAction("Details", new { id = parkingId });
+        }
+
+
+
+        [HttpPost]
         public IActionResult UpdateSubscribers(int parkingId, List<SubscriberUpdateModel> subscribers)
         {
             foreach (var sub in subscribers)

@@ -2,6 +2,7 @@
 
 public class ParkingSummaryViewModel
 {
+    public int ParkingId { get; set; }
     public string ParkingLocation { get; set; }
     public int TotalSpots { get; set; }
     public int SpotsTaken { get; set; }

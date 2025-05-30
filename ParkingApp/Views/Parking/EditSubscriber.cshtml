@@ -35,7 +35,7 @@
         </div>
 
         <div style="margin-bottom: 15px;">
-            <label for="barrierPhoneNumbers" style="font-weight: bold;">Телефонни бариери</label>
+            <label for="barrierPhoneNumbers" style="font-weight: bold;">Телефони за бариерата</label>
             <input type="text" id="barrierPhoneNumbers" name="barrierPhoneNumbers" required value="@string.Join(", ", Model.BarrierPhoneNumbers)"
                    style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
         </div>
@@ -45,7 +45,7 @@
             <select id="paymentMethod" name="paymentMethod" required
                     style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
                 <option value="Банка" selected="@(Model.PaymentMethod == ParkingApp.Data.Enum.PaymentMethod.Bank)">Bank</option>
-                <option value="В Кеш" selected="@(Model.PaymentMethod == ParkingApp.Data.Enum.PaymentMethod.Cash)">Cash</option>
+                <option value="В брой" selected="@(Model.PaymentMethod == ParkingApp.Data.Enum.PaymentMethod.Cash)">Cash</option>
                 <option value="Revolut" selected="@(Model.PaymentMethod == ParkingApp.Data.Enum.PaymentMethod.Revolut)">Revolut</option>
             </select>
         </div>
