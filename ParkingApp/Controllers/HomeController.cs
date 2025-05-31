@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ParkingApp.Data; // Namespace for DbContext
+using ParkingApp.Data;
 using ParkingApp.Data.Models;
 using ParkingApp.Models;
 using System.Diagnostics;
@@ -11,7 +11,7 @@ namespace ParkingApp.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly ParkingAppDbContext _dbContext; // Inject DbContext
+        private readonly ParkingAppDbContext _dbContext;
 
         public HomeController(ILogger<HomeController> logger, ParkingAppDbContext dbContext)
         {
@@ -21,25 +21,39 @@ namespace ParkingApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var billingMonth = DateTime.UtcNow.ToString("yyyy-MM");
-            var now = DateTime.UtcNow;
-            var nextCycle = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1).AddMonths(1);
+            var billingMonth = DateTime.Now.ToString("yyyy-MM");
+            var nextCycle = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(1);
 
             var parkingData = await _dbContext.Parkings
                 .Include(p => p.Subscribers)
                 .ToListAsync();
 
-            var summaries = parkingData.Select(p => new ParkingSummaryViewModel
+            var sentLogs = await _dbContext.SentEmailLogs
+                .Where(l => l.BillingMonth == billingMonth)
+                .ToListAsync();
+
+            var summaries = parkingData.Select(p =>
             {
-                ParkingId = p.Id,
-                ParkingLocation = p.Location,
-                TotalSpots = p.Capacity,
-                SpotsTaken = p.Subscribers.Sum(s => s.ParkingSpots.Count),
-                SpotsPaid = p.Subscribers.Count(s => s.Paid),
-                TotalIncome = p.Subscribers.Where(s => s.Paid).Sum(s => s.TotalPriceInBgn),
-                EmailSentThisMonth = _dbContext.SentEmailLogs.Any(l => l.Subscriber.ParkingId == p.Id && l.BillingMonth == billingMonth),
-                NextEmailCycleTime = nextCycle
+                var sentCount = p.Subscribers.Count(s =>
+                    sentLogs.Any(log => log.SubscriberId == s.Id)
+                );
+                var totalSubs = p.Subscribers.Count;
+
+                return new ParkingSummaryViewModel
+                {
+                    ParkingId = p.Id,
+                    ParkingLocation = p.Location,
+                    TotalSpots = p.Capacity,
+                    SpotsTaken = p.Subscribers.Sum(s => s.ParkingSpots.Count),
+                    SpotsPaid = p.Subscribers
+                    .Where(s => s.Paid)
+                    .Sum(s => s.ParkingSpots.Count),
+                    TotalIncome = p.Subscribers.Where(s => s.Paid).Sum(s => s.TotalPriceInBgn),
+                    EmailSentThisMonth = sentCount == totalSubs && totalSubs > 0,
+                    NextEmailCycleTime = nextCycle
+                };
             }).ToList();
+
 
             return View(summaries);
         }
@@ -64,16 +78,15 @@ namespace ParkingApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddParking(string name, int capacity, decimal price)
+        public IActionResult AddParking(string name, int capacity)
         {
             if (ModelState.IsValid)
             {
                 // Create a new Parking object
                 var parking = new Parking
                 {
-                    Location = name, // Map the "name" field to the "Location" property
+                    Location = name,
                     Capacity = capacity,
-                    PriceInBgn = price // Ensure the Parking model has this property
                 };
 
                 // Save the parking data to the database
@@ -103,6 +116,22 @@ namespace ParkingApp.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateCapacityAndRefresh(int id, int newCapacity)
+        {
+            var parking = await _dbContext.Parkings.FindAsync(id);
+            if (parking == null)
+            {
+                return NotFound();
+            }
+
+            parking.Capacity = newCapacity;
+            await _dbContext.SaveChangesAsync();
+
+            return RedirectToAction("Index"); // or whatever action loads the main view
         }
 
 

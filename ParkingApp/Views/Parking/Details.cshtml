@@ -2,6 +2,26 @@
 
 <h2>@Model.Location Абонати</h2>
 
+
+<form asp-action="ImportSubscribersFromExcel" asp-controller="Parking" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="parkingId" value="@Model.Id" />
+    <input type="file" name="excelFile" accept=".xlsx" required />
+    <button type="submit"
+            style="background-color: #2980b9; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px;">
+        Добави хора чрез Excel таблица
+    </button>
+</form>
+<br />
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
 <table class="table table-striped">
     <thead>
         <tr>

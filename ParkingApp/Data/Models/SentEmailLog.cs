@@ -10,7 +10,7 @@ namespace ParkingApp.Models
         public int SubscriberId { get; set; }
         public string BillingMonth { get; set; } // Format: "2025-06"
 
-        public DateTime SentAt { get; set; } = DateTime.UtcNow;
+        public DateTime SentAt { get; set; } = DateTime.Now;
 
         public Subscriber Subscriber { get; set; }
     }
