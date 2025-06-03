@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        .header { text-align: right; }
+        .main-title { font-size: 24px; color: #1a3b7d; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .table, .table th, .table td { border: 1px solid black; }
+        .table th, .table td { padding: 5px; text-align: left; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <strong>ПАРКИНГ ООД</strong><br />
+        ул. Русе ж.к. Света Троица бл. 350<br />
+        София, България<br />
+        МОЛ: ДИМИТЪР ЦАНКОВ
+    </div>
+
+    <h2 class="main-title">Фактура</h2>
+    <p>
+        No: {{InvoiceNumber}}<br />
+        Дата: {{InvoiceDate}}
+    </p>
+
+    <h3>Получател</h3>
+    <p>
+        {{SubscriberName}}<br />
+        {{SubscriberAddress}}<br />
+        Email: {{SubscriberEmail}}
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr><th>No</th><th>Услуга</th><th>К-во</th><th>Ед. цена</th><th>ДДС</th><th>Общо</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>абонамент паркинг</td>
+                <td>1</td>
+                <td>{{UnitPrice}}</td>
+                <td>20%</td>
+                <td>{{TotalPrice}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p><strong>Крайна сума: {{FinalAmount}} лв.</strong></p>
+</body>
+</html>

@@ -1,8 +1,11 @@
+using DinkToPdf;
+using DinkToPdf.Contracts;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using ParkingApp.Data;
 using ParkingApp.Services;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.Extensions.Options;
+using ParkingApp.Utilities;
 using System.Globalization;
 
 namespace ParkingApp
@@ -19,14 +22,19 @@ namespace ParkingApp
             builder.Services.AddDbContext<ParkingAppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            //Emails
+            // Emails
             builder.Services.AddScoped<EmailService>();
             builder.Services.AddScoped<MonthlyBillingService>();
             builder.Services.AddScoped<PaymentProcessingService>();
+            builder.Services.AddScoped<InvoiceService>();
+            builder.Services.AddScoped<PdfGenerator>();
+
+            // Register the DinkToPdf converter (REQUIRED)
+            builder.Services.AddSingleton<IConverter>(new SynchronizedConverter(new PdfTools()));
+
+            // Background task
             builder.Services.AddHostedService<MonthlyTaskRunner>(); // background monthly job
 
-            //Translation
-            builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
             builder.Services.AddControllersWithViews()
                 .AddViewLocalization()
@@ -43,15 +51,7 @@ namespace ParkingApp
                 app.UseHsts();
             }
 
-            var supportedCultures = new[] { "en", "bg" };
-            var localizationOptions = new RequestLocalizationOptions()
-                .SetDefaultCulture("en")
-                .AddSupportedCultures(supportedCultures)
-                .AddSupportedUICultures(supportedCultures);
-
-            localizationOptions.RequestCultureProviders.Insert(0, new QueryStringRequestCultureProvider());
-
-            app.UseRequestLocalization(localizationOptions);
+            
 
 
             app.UseHttpsRedirection();

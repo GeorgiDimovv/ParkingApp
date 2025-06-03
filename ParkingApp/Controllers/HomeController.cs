@@ -44,15 +44,14 @@ namespace ParkingApp.Controllers
                     ParkingId = p.Id,
                     ParkingLocation = p.Location,
                     TotalSpots = p.Capacity,
-                    SpotsTaken = p.Subscribers.Sum(s => s.ParkingSpots.Count),
-                    SpotsPaid = p.Subscribers
-                    .Where(s => s.Paid)
-                    .Sum(s => s.ParkingSpots.Count),
+                    SpotsTaken = p.Subscribers.Count(s => !string.IsNullOrWhiteSpace(s.ParkingSpot)),
+                    SpotsPaid = p.Subscribers.Count(s => s.Paid && !string.IsNullOrWhiteSpace(s.ParkingSpot)),
                     TotalIncome = p.Subscribers.Where(s => s.Paid).Sum(s => s.TotalPriceInBgn),
                     EmailSentThisMonth = sentCount == totalSubs && totalSubs > 0,
                     NextEmailCycleTime = nextCycle
                 };
             }).ToList();
+
 
 
             return View(summaries);

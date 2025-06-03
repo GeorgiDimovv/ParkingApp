@@ -44,36 +44,59 @@ namespace ParkingApp.Controllers
 
         // Adds a new subscriber to the database
         [HttpPost]
-        public IActionResult AddSubscriber(int parkingId, string name, string email, string phoneNumbers, string barrierPhoneNumbers, string spots, PaymentMethod paymentMethod, decimal priceInBgn, bool paid)
+        public IActionResult AddSubscriber(int parkingId, string spot, string name, string engBuisness, string bgBuisness, string email, string phoneNumbers, string barrierPhoneNumbers, PaymentMethod paymentMethod, decimal priceInBgn, bool paid)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                // Create a new Subscriber object with form data
-                var subscriber = new Subscriber
-                {
-                    Name = name,
-                    PhoneNumber = phoneNumbers.Split(",").ToList(),
-                    EmailAddress = email,
-                    ParkingSpots = spots.Split(",").ToList(),
-                    BarrierPhoneNumbers = barrierPhoneNumbers.Split(",").ToList(),
-                    PaymentMethod = paymentMethod,
-                    PriceInBgn = priceInBgn,
-                    Paid = paid,
-                    ParkingId = parkingId
-                    // UPDATE: You might want to add a check for existing subscribers or parking spots here
-                };
+                return View("AddSubscriber");
+            }
 
-                subscriber.TotalPriceInBgn = subscriber.ParkingSpots.Count * subscriber.PriceInBgn;
+            var phoneList = phoneNumbers.Split(",").Select(p => p.Trim()).Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+            var barrierList = barrierPhoneNumbers.Split(",").Select(b => b.Trim()).Where(b => !string.IsNullOrWhiteSpace(b)).ToList();
 
-                _DbContext.Subscribers.Add(subscriber);
-                _DbContext.SaveChanges();
+            var takenSpots = _DbContext.Subscribers
+                .Where(s => s.ParkingId == parkingId)
+                .Select(s => s.ParkingSpot)
+                .ToHashSet();
 
-                TempData["SuccessMessage"] = "Subscriber added successfully!";
+            if (string.IsNullOrWhiteSpace(spot))
+            {
+                TempData["Error"] = "Моля, въведете валидно място за паркиране.";
                 return RedirectToAction("Details", new { id = parkingId });
             }
 
-            return View("AddSubscriber");
+            if (takenSpots.Contains(spot))
+            {
+                TempData["Error"] = $"Мястото {spot} вече е заето.";
+                return RedirectToAction("Details", new { id = parkingId });
+            }
+
+            var newSubscriber = new Subscriber
+            {
+
+                ParkingSpot = spot,
+                Name = name,
+                ENGBuisnessName = engBuisness,
+                BGBuisnessName = bgBuisness,
+                PhoneNumber = phoneList,
+                EmailAddress = email,
+                BarrierPhoneNumbers = barrierList,
+                PaymentMethod = paymentMethod,
+                PriceInBgn = priceInBgn,
+                Paid = paid,
+                ParkingId = parkingId,
+                TotalPriceInBgn = priceInBgn
+            };
+
+            _DbContext.Subscribers.Add(newSubscriber);
+            _DbContext.SaveChanges();
+
+            TempData["SuccessMessage"] = "Абонатът беше добавен успешно!";
+            return RedirectToAction("Details", new { id = parkingId });
         }
+
+
+
 
         // Deletes a subscriber from a parking lot
         [HttpPost]
@@ -90,6 +113,24 @@ namespace ParkingApp.Controllers
 
             return RedirectToAction("Details", new { id = parkingId });
         }
+
+        [HttpGet]
+        public IActionResult SearchSubscribers(int parkingId, string searchTerm)
+        {
+            var normalizedTerm = searchTerm?.ToLower();
+
+            var subscribers = _DbContext.Subscribers
+                .Where(s => s.ParkingId == parkingId &&
+                    (string.IsNullOrEmpty(normalizedTerm) ||
+                     s.Name.ToLower().Contains(normalizedTerm) ||
+                     s.PhoneNumber.Any(p => p.ToLower().Contains(normalizedTerm))
+                    )
+                )
+                .ToList();
+
+            return PartialView("_SubscribersTable", subscribers);
+        }
+
 
 
 
@@ -130,7 +171,7 @@ namespace ParkingApp.Controllers
 
         // Updates a subscriber’s details from the edit form
         [HttpPost]
-        public IActionResult EditSubscriber(int parkingId, int subscriberId, string name, string email, string phoneNumbers, string barrierPhoneNumbers, string spots, PaymentMethod paymentMethod, decimal priceInBgn, bool paid)
+        public IActionResult EditSubscriber(int parkingId, int subscriberId, string name, string engBuisness, string bgBuisness, string email, string phoneNumbers, string barrierPhoneNumbers, string spots, PaymentMethod paymentMethod, decimal priceInBgn, bool paid)
         {
             var parking = _DbContext.Parkings
                 .Include(p => p.Subscribers)
@@ -143,25 +184,41 @@ namespace ParkingApp.Controllers
             if (subscriber == null)
                 return NotFound();
 
-            // Update subscriber properties
+            var newSpot = spots?.Trim();
+
+            // Check if new spot is taken by another subscriber
+            if (_DbContext.Subscribers.Any(s => s.ParkingId == parkingId && s.Id != subscriberId && s.ParkingSpot == newSpot))
+            {
+                TempData["Error"] = $"Мястото {newSpot} вече е заето.";
+                return RedirectToAction("Details", new { id = parkingId });
+            }
+
+            // Update properties
             subscriber.Name = name;
-            subscriber.PhoneNumber = phoneNumbers.Split(",").ToList();
+            subscriber.ENGBuisnessName = engBuisness;
+            subscriber.BGBuisnessName = bgBuisness;
+            subscriber.PhoneNumber = phoneNumbers.Split(",").Select(p => p.Trim()).ToList();
             subscriber.EmailAddress = email;
-            subscriber.ParkingSpots = spots.Split(",").ToList();
-            subscriber.BarrierPhoneNumbers = barrierPhoneNumbers.Split(",").ToList();
+            subscriber.ParkingSpot = newSpot;
+            subscriber.BarrierPhoneNumbers = barrierPhoneNumbers.Split(",").Select(b => b.Trim()).ToList();
             subscriber.PaymentMethod = paymentMethod;
             subscriber.PriceInBgn = priceInBgn;
-            subscriber.TotalPriceInBgn = subscriber.ParkingSpots.Count * priceInBgn;
+            subscriber.TotalPriceInBgn = priceInBgn;
+            subscriber.Paid = paid;
 
-            _DbContext.SaveChanges(); // Save updates
-
+            _DbContext.SaveChanges();
+            TempData["SuccessMessage"] = "Абонатът беше обновен успешно!";
             return RedirectToAction("Details", new { id = parkingId });
         }
+
 
         // Imports subscribers from an uploaded Excel file
         [HttpPost]
         public async Task<IActionResult> ImportSubscribersFromExcel(IFormFile excelFile, int parkingId)
         {
+            ExcelPackage.License.SetNonCommercialOrganization("My Noncommercial organization");
+
+
             if (excelFile == null || excelFile.Length == 0)
             {
                 TempData["Error"] = "Моля, изберете валиден Excel файл.";
@@ -185,29 +242,34 @@ namespace ParkingApp.Controllers
                     int rowCount = worksheet.Dimension.Rows; // Get number of rows
 
                     // Loop through rows starting from 2 (assuming row 1 is headers)
-                    for (int row = 2; row <= rowCount; row++)
+                    for (int row = 3; row <= rowCount; row++)
                     {
-                        var name = worksheet.Cells[row, 1].Text;
-                        var phone = worksheet.Cells[row, 4].Text;
-                        var barrier = worksheet.Cells[row, 5].Text;
-                        var priceText = worksheet.Cells[row, 6].Text;
-                        var paymentMethod = worksheet.Cells[row, 7].Text;
+                        string spot = worksheet.Cells[row, 1].Text;
+                        string name = worksheet.Cells[row, 2].Text;
+                        string engBuisness = worksheet.Cells[row, 3].Text;
+                        string bgBuisness = worksheet.Cells[row, 4].Text;
+                        string phone = worksheet.Cells[row, 5].Text;
+                        string barrier = worksheet.Cells[row, 6].Text;
+                        var priceText = worksheet.Cells[row, 7].Text;
+                        var paymentMethod = worksheet.Cells[row, 8].Text;
 
                         if (string.IsNullOrWhiteSpace(name)) continue; // Skip empty names
 
                         subscribers.Add(new Subscriber
                         {
+                            ParkingSpot = spot,
                             Name = name,
+                            ENGBuisnessName = engBuisness,
+                            BGBuisnessName = bgBuisness,
                             PhoneNumber = new List<string> { phone },
                             BarrierPhoneNumbers = new List<string> { barrier },
-                            PriceInBgn = decimal.TryParse(priceText, out var price) ? price : 0, // Parse or default to 0
+                            PriceInBgn = decimal.TryParse(priceText, out var price) ? price : 0,
                             PaymentMethod = Enum.TryParse<PaymentMethod>(paymentMethod.Trim(), true, out var parsedMethod)
                                 ? parsedMethod
                                 : PaymentMethod.Cash, // Default to cash
 
                             Paid = false,
                             MonthsPaidAhead = 0,
-                            TotalPriceInBgn = 0,
                             EmailAddress = "", // Optional email
                             ParkingId = parkingId
                         });

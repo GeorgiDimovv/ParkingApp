@@ -2,102 +2,70 @@
 
 <h2>@Model.Location Абонати</h2>
 
+<!-- Search + Import Excel Row -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <!-- Search Bar -->
+    <form id="searchForm" style="display: flex; gap: 10px;">
+        <input type="hidden" name="parkingId" value="@Model.Id" />
+        <input type="text" id="searchTerm" name="searchTerm" placeholder="Търси по име или телефонен номер..."
+               style="padding: 8px; border: 1px solid #ccc; border-radius: 5px; width: 400px;" />
+        <button type="submit"
+                style="background-color: #1abc9c; color: #fff; padding: 8px 16px; border: none; border-radius: 5px; font-size: 14px; transition: background-color 0.3s ease;"
+                onmouseover="this.style.backgroundColor='#16a085';"
+                onmouseout="this.style.backgroundColor='#1abc9c';">
+            Търси
+        </button>
+    </form>
 
-<form asp-action="ImportSubscribersFromExcel" asp-controller="Parking" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="parkingId" value="@Model.Id" />
-    <input type="file" name="excelFile" accept=".xlsx" required />
-    <button type="submit"
-            style="background-color: #2980b9; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px;">
-        Добави хора чрез Excel таблица
-    </button>
-</form>
-<br />
+    <!-- Import Excel Form -->
+    <form asp-action="ImportSubscribersFromExcel" asp-controller="Parking" method="post" enctype="multipart/form-data" style="display: flex; gap: 10px; align-items: center;">
+        <input type="hidden" name="parkingId" value="@Model.Id" />
+        <label style="display: flex; align-items: center; gap: 10px;">
+            <input type="file" name="excelFile" accept=".xlsx" required
+                   style="border: 1px solid #ccc; border-radius: 5px; padding: 5px; font-size: 14px;" />
+        </label>
+        <button type="submit"
+                style="background-color: #2980b9; color: #fff; padding: 8px 16px; border: none; border-radius: 5px; font-size: 14px; transition: background-color 0.3s ease;"
+                onmouseover="this.style.backgroundColor='#2471a3';"
+                onmouseout="this.style.backgroundColor='#2980b9';">
+            Добави чрез Excel
+        </button>
+    </form>
+</div>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Име</th>
-            <th>Телефонен номер</th>
-            <th>Имейл</th>
-            <th>Места</th>
-            <th>Телефонни номера за бариерата</th>
-            <th>Плащане</th>
-            <th>Обща сума в левове</th>
-            <th>Платен</th>
-            <th>Месеци Платени</th>
-            <th>Цена</th>
-            <th></th> <!-- For Edit -->
-            <th></th> <!-- For Delete -->
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var sub in Model.Subscribers)
-        {
-            <tr>
-                <td>@sub.Name</td>
-                <td>@string.Join(", ", sub.PhoneNumber)</td>
-                <td>@sub.EmailAddress</td>
-                <td>@string.Join(", ", sub.ParkingSpots)</td>
-                <td>@string.Join(", ", sub.BarrierPhoneNumbers)</td>
-                <td>@sub.PaymentMethod</td>
-                <td>@sub.TotalPriceInBgn</td>
-                <td>
-                    <form method="post" asp-action="TogglePaid" asp-controller="Parking" style="display:inline;">
-                        <input type="hidden" name="subscriberId" value="@sub.Id" />
-                        <input type="hidden" name="parkingId" value="@Model.Id" />
-                        <button type="submit"
-                                style="width: 20px; height: 20px; border: 1px solid #ccc; border-radius: 3px; background-color:@(sub.Paid ? "#1abc9c" : "#fff"); cursor: pointer; transition: background-color 0.3s ease;"
-                                onmouseover="this.style.backgroundColor = '#16a085';"
-                                onmouseout="this.style.backgroundColor='@(sub.Paid ? "#1abc9c" : "#fff")';">
-                        </button>
-                    </form>
-                </td>
-                <td>@sub.MonthsPaidAhead</td>
-                <td>@sub.PriceInBgn</td>
+<!-- Table Wrapper for AJAX -->
+<div id="subscribersTable">
+    @await Html.PartialAsync("_SubscribersTable", Model.Subscribers.ToList())
+</div>
 
-                <!-- Edit Button Column -->
-                <td>
-                    <a href="@Url.Action("EditSubscriber", "Parking", new { parkingId = Model.Id, subscriberId = sub.Id })"
-                       style="display: inline-block; width: 90px; background-color: #1abc9c; color: #fff; padding: 5px 0; border: none; border-radius: 5px; font-size: 14px; text-align: center; text-decoration: none; transition: background-color 0.3s ease;"
-                       onmouseover="this.style.backgroundColor='#16a085';"
-                       onmouseout="this.style.backgroundColor='#1abc9c';">
-                        Промени
-                    </a>
-                </td>
-
-                <!-- Delete Button Column -->
-                <td>
-                    <form method="post"
-                          asp-action="DeleteSubscriber"
-                          asp-controller="Parking"
-                          onsubmit="return confirm('Сигурни ли сте, че искате да премахнете този абонат?');"
-                          style="display:inline;">
-                        <input type="hidden" name="subscriberId" value="@sub.Id" />
-                        <input type="hidden" name="parkingId" value="@Model.Id" />
-                        <button type="submit"
-                                style="width: 90px; background-color: #e74c3c; color: #fff; padding: 5px 0; border: none; border-radius: 5px; font-size: 14px;">
-                            Изтрии
-                        </button>
-                    </form>
-                </td>
-
-            </tr>
-        }
-    </tbody>
-</table>
-
+<!-- Add Subscriber Button -->
 <a href="@Url.Action("AddSubscriber", "Parking", new { parkingId = Model.Id })"
-   style="background-color: #1abc9c; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; text-decoration: none; transition: background-color 0.3s ease;"
+   style="margin-top: 20px; display: inline-block; background-color: #1abc9c; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; text-decoration: none; transition: background-color 0.3s ease;"
    onmouseover="this.style.backgroundColor='#16a085';"
    onmouseout="this.style.backgroundColor='#1abc9c';">
     Добави абонат
 </a>
+
+<!-- AJAX Script -->
+<script>
+    document.getElementById('searchForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const searchTerm = document.getElementById('searchTerm').value;
+        const parkingId = form.parkingId.value;
+
+        fetch(`/Parking/SearchSubscribers?parkingId=${parkingId}&searchTerm=${encodeURIComponent(searchTerm)}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('subscribersTable').innerHTML = html;
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>

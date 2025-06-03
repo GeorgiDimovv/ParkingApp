@@ -9,6 +9,12 @@
     <form method="post" action="/Parking/EditSubscriber">
         <input type="hidden" name="parkingId" value="@ViewBag.ParkingId" />
         <input type="hidden" name="subscriberId" value="@Model.Id" />
+        
+        <div style="margin-bottom: 15px;">
+            <label for="spots" style="font-weight: bold;">Място</label>
+            <input type="text" id="spots" name="spots" required value="@Model.ParkingSpot)"
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+        </div>
 
         <div style="margin-bottom: 15px;">
             <label for="name" style="font-weight: bold;">Име</label>
@@ -16,6 +22,17 @@
                    style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
         </div>
 
+        <div style="margin-bottom: 15px;">
+            <label for="engBuisness" style="font-weight: bold;">ENG</label>
+            <input type="text" id="engBuisness" name="engBuisness" required value="@Model.Name"
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="bgBuisness" style="font-weight: bold;">BG</label>
+            <input type="text" id="bgBuisness" name="bgBuisness" required value="@Model.Name"
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+        </div>
         <div style="margin-bottom: 15px;">
             <label for="phoneNumbers" style="font-weight: bold;">Телефонен номер</label>
             <input type="text" id="phoneNumbers" name="phoneNumbers" required value="@string.Join(", ", Model.PhoneNumber)"
@@ -29,13 +46,7 @@
         </div>
 
         <div style="margin-bottom: 15px;">
-            <label for="spots" style="font-weight: bold;">Места</label>
-            <input type="text" id="spots" name="spots" required value="@string.Join(", ", Model.ParkingSpots)"
-                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
-        </div>
-
-        <div style="margin-bottom: 15px;">
-            <label for="barrierPhoneNumbers" style="font-weight: bold;">Телефони за бариерата</label>
+            <label for="barrierPhoneNumbers" style="font-weight: bold;">Оторизирани номера</label>
             <input type="text" id="barrierPhoneNumbers" name="barrierPhoneNumbers" required value="@string.Join(", ", Model.BarrierPhoneNumbers)"
                    style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
         </div>

@@ -1,0 +1,203 @@
+﻿@model ParkingApp.Models.ViewModels.InvoiceViewModel
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Фактура</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            margin: 0;
+            padding: 0 40px;
+            color: #000;
+        }
+
+        .header, .footer {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+            .header .company-name {
+                background-color: #002b62;
+                color: #fff;
+                padding: 10px;
+                font-size: 18px;
+                font-weight: bold;
+                text-align: right;
+            }
+
+        .title {
+            font-size: 24px;
+            color: #1a3b7d;
+            font-weight: bold;
+        }
+
+        .info-table, .item-table, .totals {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+            .info-table td, .item-table th, .item-table td, .totals td {
+                border: 1px solid #ccc;
+                padding: 6px;
+            }
+
+            .item-table th {
+                background-color: #1a3b7d;
+                color: white;
+            }
+
+        .section-title {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .sign {
+            margin-top: 40px;
+        }
+
+            .sign td {
+                padding-top: 40px;
+            }
+
+        .gray-box {
+            background: #f4f4f4;
+            padding: 10px;
+            margin-top: 10px;
+            width: 250px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="company-name">ПАРКИНГ ООД</div>
+    </div>
+
+    <table class="info-table">
+        <tr>
+            <td style="border:none;">
+                <div class="title">Фактура</div>
+                <p>No: {{InvoiceNumber}}<br>ОРИГИНАЛ</p>
+            </td>
+            <td class="gray-box">
+                <strong>Доставчик:</strong><br>
+                Име на фирма: <strong>{{SupplierName}}</strong><br>
+                ЕИК: {{SupplierEIK}}<br>
+                ДДС №: {{SupplierVAT}}<br>
+                Град: {{SupplierCity}}<br>
+                Адрес: {{SupplierAddress}}<br>
+                МОЛ: {{SupplierRep}}<br>
+            </td>
+        </tr>
+    </table>
+
+    <table class="info-table">
+        <tr>
+            <td>Дата на издаване:</td>
+            <td>{{IssueDate}}</td>
+            <td>Дата на дан. събитие:</td>
+            <td>{{EventDate}}</td>
+            <td>Място на сделката:</td>
+            <td>{{DealPlace}}</td>
+        </tr>
+    </table>
+
+    <table class="item-table">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Име на стоката/услугата</th>
+                <th>Марка</th>
+                <th>К-во</th>
+                <th>Ед. цена</th>
+                <th>ДДС (%)</th>
+                <th>Стойност</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>{{ItemName}}</td>
+                <td>бр.</td>
+                <td>{{ItemQty}}</td>
+                <td>{{ItemPrice}}</td>
+                <td>20.00%</td>
+                <td>{{ItemTotal}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="section-title">Получател:</div>
+    <table class="info-table">
+        <tr>
+            <td>Име на фирма:</td>
+            <td><strong>{{ClientName}}</strong></td>
+        </tr>
+        <tr>
+            <td>ЕИК:</td>
+            <td>{{ClientEIK}}</td>
+        </tr>
+        <tr>
+            <td>Град:</td>
+            <td>{{ClientCity}}</td>
+        </tr>
+        <tr>
+            <td>Адрес:</td>
+            <td>{{ClientAddress}}</td>
+        </tr>
+        <tr>
+            <td>МОЛ:</td>
+            <td>{{ClientRep}}</td>
+        </tr>
+    </table>
+
+    <div class="section-title">Начин на плащане: {{PaymentMethod}}</div>
+    <div>
+        <strong>Банкови реквизити:</strong><br>
+        {{BankName}}, BIC: {{BIC}}<br>
+        IBAN: {{IBAN}} (BGN)<br>
+    </div>
+
+    <table class="totals">
+        <tr>
+            <td class="right bold">Данъчна основа (20.00 %):</td>
+            <td class="right">{{TaxBase}} BGN</td>
+        </tr>
+        <tr>
+            <td class="right bold">Начислен ДДС (20.00 %):</td>
+            <td class="right">{{VAT}} BGN</td>
+        </tr>
+        <tr>
+            <td class="right bold">Сума за плащане:</td>
+            <td class="right bold">{{Total}} BGN</td>
+        </tr>
+    </table>
+
+    <p>Словом: {{TotalWords}}</p>
+    <p>Основание на сделка по ЗДДС: {{VATReason}}</p>
+
+    <table class="sign" width="100%">
+        <tr>
+            <td>Получател:<br><strong>{{ClientName}}</strong><br>Подпис: ............................................</td>
+            <td class="right">Съставил:<br><strong>{{SupplierRep}}</strong><br>Подпис: ............................................</td>
+        </tr>
+    </table>
+
+    <p style="font-size: 11px; margin-top: 30px;">
+        Съгласно чл.6, ал.1 от Закона за счетоводството, чл.114 от ЗДДС и чл.78 от ППЗДДС печатът и подписът не са задължителни реквизити на фактурата.
+    </p>
+
+</body>
+</html>

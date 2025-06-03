@@ -13,12 +13,14 @@ namespace ParkingApp.Services
     {
         private readonly ParkingAppDbContext _DbContext;
         private readonly EmailService _emailService;
-
-        public MonthlyBillingService(ParkingAppDbContext dbContext, EmailService emailService)
+        private readonly InvoiceService _invoiceService;
+        public MonthlyBillingService(ParkingAppDbContext dbContext, EmailService emailService, InvoiceService invoiceService)
         {
             _DbContext = dbContext;
             _emailService = emailService;
+            _invoiceService = invoiceService;
         }
+
 
         public async Task ProcessMonthlyBillingAsync()
         {
@@ -34,44 +36,56 @@ namespace ParkingApp.Services
                 .Include(s => s.Parking)
                 .ToList();
 
-            foreach (var sub in subscribers)
+            var groupedSubscribers = subscribers
+                .GroupBy(s => s.EmailAddress)
+                .ToList();
+
+            foreach (var group in groupedSubscribers)
             {
-                if (alreadySentIds.Contains(sub.Id))
+                var sub = group.First(); // pick one for name/email
+
+                if (alreadySentIds.Contains(sub.Id)) continue;
+
+                // Merge prices from all entries
+                var totalPrice = group.Sum(s => s.TotalPriceInBgn);
+                var combinedSpots = string.Join(", ", group.Select(s => s.ParkingSpot));
+                var parkingLocation = sub.Parking?.Location ?? "";
+
+                // Decrement MonthsPaidAhead for all spots
+                foreach (var s in group)
                 {
-                    Console.WriteLine($"SKIPPED {sub.Name} — already emailed this month.");
-                    continue;
+                    if (s.MonthsPaidAhead > 0) s.MonthsPaidAhead--;
+                    s.Paid = s.MonthsPaidAhead > 0;
                 }
 
-                if (sub.MonthsPaidAhead > 0)
+                var mergedSub = new Subscriber
                 {
-                    sub.MonthsPaidAhead--;
-                    sub.Paid = true;
-                }
-                else
-                {
-                    sub.Paid = false;
-                }
+                    Id = sub.Id,
+                    Name = sub.Name,
+                    EmailAddress = sub.EmailAddress,
+                    ParkingSpot = combinedSpots,
+                    TotalPriceInBgn = totalPrice,
+                    Parking = sub.Parking // optional if needed for location
+                };
 
-                Console.WriteLine($"PROCESSING {sub.Name} (Paid: {sub.Paid}, MonthsAhead: {sub.MonthsPaidAhead})");
+                var invoicePdf = _invoiceService.GenerateInvoicePdf(mergedSub);
 
-                await _emailService.SendEmailAsync(
-                    sub.EmailAddress,
-                    $"[Parking: {sub.Parking?.Location}] Payment Due",
-                    $"Dear {sub.Name},\n\nYour parking fee of {sub.TotalPriceInBgn} BGN is due for this month.\n\nRegards,\nParking Admin"
+                await _emailService.SendEmailWithAttachmentAsync(
+                    mergedSub.EmailAddress,
+                    $"[Parking: {parkingLocation}] Месечна фактура",
+                    $"Здравейте {mergedSub.Name},\n\nПрикачена е вашата фактура за този месец.\n\nПоздрави,\nПаркинг администрация",
+                    invoicePdf,
+                    $"Фактура-{DateTime.Now:yyyyMM}-{mergedSub.Id}.pdf"
                 );
 
                 _DbContext.SentEmailLogs.Add(new SentEmailLog
                 {
-                    SubscriberId = sub.Id,
+                    SubscriberId = mergedSub.Id,
                     BillingMonth = billingMonth,
                     SentAt = DateTime.UtcNow
                 });
             }
-
             await _DbContext.SaveChangesAsync();
         }
-
-
-
     }
 }

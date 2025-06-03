@@ -8,17 +8,24 @@ namespace ParkingApp.Data.Models
     {
         public int Id { get; set; }
 
+
+        [Required]
+        public string ParkingSpot { get; set; } = null!;
+
         [Required]
         public string Name { get; set; } = null!;
+
+
+        public string ENGBuisnessName { get; set; } = null!;
+
+        public string BGBuisnessName { get; set; } = null!;
+
 
         [Required]
         public List<string> PhoneNumber { get; set; } = new List<string>();
 
         [EmailAddress]
         public string EmailAddress { get; set; } = null!;
-
-        [Required]
-        public List<string> ParkingSpots { get; set; } = new List<string>();
 
         [Required]
         public List<string> BarrierPhoneNumbers { get; set; } = new List<string>();
@@ -32,12 +39,11 @@ namespace ParkingApp.Data.Models
         [Required]
         public decimal PriceInBgn { get; set; }
 
-        [Required]
+
         public decimal TotalPriceInBgn { get; set; } = 0;
 
         [Required]
         public bool Paid { get; set; } = false;
-        //UPDATE: eng and bgn variant for names because revolut gives in eng and bank gives in bgn language
 
         public int MonthsPaidAhead { get; set; } = 0;
     }

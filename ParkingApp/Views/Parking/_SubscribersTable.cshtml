@@ -1,0 +1,107 @@
+﻿<style>
+    table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    th, td {
+        word-wrap: break-word;
+        white-space: normal;
+        overflow-wrap: break-word;
+    }
+
+        th:nth-child(6), td:nth-child(6) {
+            width: 200px; /* Email column */
+        }
+
+        th:nth-child(7), td:nth-child(7) {
+            width: 200px; /* Authorized numbers */
+        }
+</style>
+<div style="
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: white;
+    box-sizing: border-box;
+">
+
+    <table class="table table-striped" style="
+        margin: 0;
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    ">
+        <thead style="
+            position: sticky;
+            top: -3px;
+            background-color: white;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        ">
+            <tr style="height: calc(100%*5px);">
+                <th style="background-color: white;">Паркинг място</th>
+                <th style="background-color: white;">Име</th>
+				<th style="background-color: white;">ENG</th>
+				<th style="background-color: white;">BG</th>
+                <th style="background-color: white;">Телефонен номер</th>
+                <th style="background-color: white;">Имейл</th>
+                <th style="background-color: white;">Оторизирани номера</th>
+                <th style="background-color: white;">Начин на плащане</th>
+                <th style="background-color: white;">Платен</th>
+                <th style="background-color: white;">Месеци платени предварително</th>
+                <th style="background-color: white;">Цена</th>
+                <th style="background-color: white;"></th>
+                <th style="background-color: white;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sub in Model)
+            {
+                <tr>
+                    <td>@sub.ParkingSpot</td>
+                    <td>@sub.Name</td>
+                    <td>@sub.ENGBuisnessName</td>
+                    <td>@sub.BGBuisnessName</td>
+                    <td>@string.Join(", ", sub.PhoneNumber)</td>
+                    <td>@sub.EmailAddress</td>
+                    <td>@string.Join(", ", sub.BarrierPhoneNumbers)</td>
+                    <td>@sub.PaymentMethod</td>
+                    <td>
+                        <form method="post" asp-action="TogglePaid" asp-controller="Parking" style="display:inline;">
+                            <input type="hidden" name="subscriberId" value="@sub.Id" />
+                            <input type="hidden" name="parkingId" value="@sub.ParkingId" />
+                            <button type="submit"
+                                    style="width: 20px; height: 20px; border: 1px solid #ccc; border-radius: 3px; background-color:@(sub.Paid ? "#1abc9c" : "#fff"); cursor: pointer; transition: background-color 0.3s ease;"
+                                    onmouseover="this.style.backgroundColor = '#16a085';"
+                                    onmouseout="this.style.backgroundColor='@(sub.Paid ? "#1abc9c" : "#fff")';">
+                            </button>
+                        </form>
+                    </td>
+                    <td>@sub.MonthsPaidAhead</td>
+                    <td>@sub.PriceInBgn</td>
+                    <td>
+                        <a href="@Url.Action("EditSubscriber", "Parking", new { parkingId = sub.ParkingId, subscriberId = sub.Id })"
+                           style="display: inline-block; width: 90px; background-color: #1abc9c; color: #fff; padding: 5px 0; border: none; border-radius: 5px; font-size: 14px; text-align: center; text-decoration: none; transition: background-color 0.3s ease;"
+                           onmouseover="this.style.backgroundColor='#16a085';"
+                           onmouseout="this.style.backgroundColor='#1abc9c';">
+                            Промени
+                        </a>
+                    </td>
+                    <td>
+                        <form method="post" asp-action="DeleteSubscriber" asp-controller="Parking" onsubmit="return confirm('Сигурни ли сте, че искате да премахнете този абонат?');" style="display:inline;">
+                            <input type="hidden" name="subscriberId" value="@sub.Id" />
+                            <input type="hidden" name="parkingId" value="@sub.ParkingId" />
+                            <button type="submit"
+                                    style="width: 90px; background-color: #e74c3c; color: #fff; padding: 5px 0; border: none; border-radius: 5px; font-size: 14px;">
+                                Изтрии
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

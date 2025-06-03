@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ParkingApp.Data;
 
@@ -11,9 +12,11 @@ using ParkingApp.Data;
 namespace ParkingApp.Migrations
 {
     [DbContext(typeof(ParkingAppDbContext))]
-    partial class ParkingAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250602183532_Update3")]
+    partial class Update3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,15 +56,7 @@ namespace ParkingApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("BGBuisnessName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.PrimitiveCollection<string>("BarrierPhoneNumbers")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ENGBuisnessName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -83,6 +78,10 @@ namespace ParkingApp.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ParkingSpot")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.PrimitiveCollection<string>("ParkingSpots")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
