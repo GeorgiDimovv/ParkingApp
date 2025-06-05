@@ -18,7 +18,7 @@ namespace ParkingApp.Services
             var subscriber = _DbContext.Subscribers.FirstOrDefault(s => s.EmailAddress == email);
             if (subscriber == null) return;
 
-            int monthsPaid = (int)Math.Floor(amount / subscriber.TotalPriceInBgn);
+            int monthsPaid = (int)Math.Floor(amount / subscriber.PriceInBgn);
             if (monthsPaid > 0)
             {
                 subscriber.Paid = true;

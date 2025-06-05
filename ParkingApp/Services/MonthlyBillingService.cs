@@ -47,7 +47,6 @@ namespace ParkingApp.Services
                 if (alreadySentIds.Contains(sub.Id)) continue;
 
                 // Merge prices from all entries
-                var totalPrice = group.Sum(s => s.TotalPriceInBgn);
                 var combinedSpots = string.Join(", ", group.Select(s => s.ParkingSpot));
                 var parkingLocation = sub.Parking?.Location ?? "";
 
@@ -64,7 +63,6 @@ namespace ParkingApp.Services
                     Name = sub.Name,
                     EmailAddress = sub.EmailAddress,
                     ParkingSpot = combinedSpots,
-                    TotalPriceInBgn = totalPrice,
                     Parking = sub.Parking // optional if needed for location
                 };
 

@@ -1,6 +1,10 @@
 ﻿@model ParkingApp.Data.Models.Parking
 
-<h2>@Model.Location Абонати</h2>
+@{
+    Layout = "_Layout";
+}
+
+<h2>@Model.Location</h2>
 
 <!-- Search + Import Excel Row -->
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -18,21 +22,41 @@
     </form>
 
     <!-- Import Excel Form -->
-    <form asp-action="ImportSubscribersFromExcel" asp-controller="Parking" method="post" enctype="multipart/form-data" style="display: flex; gap: 10px; align-items: center;">
+    <form asp-action="ImportSubscribersFromExcel"
+          asp-controller="Parking"
+          method="post"
+          enctype="multipart/form-data"
+          style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px;">
+
         <input type="hidden" name="parkingId" value="@Model.Id" />
-        <label style="display: flex; align-items: center; gap: 10px;">
-            <input type="file" name="excelFile" accept=".xlsx" required
-                   style="border: 1px solid #ccc; border-radius: 5px; padding: 5px; font-size: 14px;" />
+
+        <label style="display: flex; align-items: center; gap: 10px; margin: 0;">
+            <input type="file"
+                   name="excelFile"
+                   accept=".xlsx"
+                   required
+                   style="border: 1px solid #ccc;
+                          border-radius: 5px;
+                          padding: 5px;
+                          font-size: 14px;
+                          height: 36px;" />
         </label>
+
         <button type="submit"
-                style="background-color: #2980b9; color: #fff; padding: 8px 16px; border: none; border-radius: 5px; font-size: 14px; transition: background-color 0.3s ease;"
-                onmouseover="this.style.backgroundColor='#2471a3';"
-                onmouseout="this.style.backgroundColor='#2980b9';">
+                style="background-color: #1abc9c;
+                       color: #fff;
+                       padding: 8px 16px;
+                       border: none;
+                       border-radius: 5px;
+                       font-size: 14px;
+                       height: 36px;
+                       transition: background-color 0.3s ease;"
+                onmouseover="this.style.backgroundColor='#16a085';"
+                onmouseout="this.style.backgroundColor='#1abc9c';">
             Добави чрез Excel
         </button>
     </form>
 </div>
-
 
 <!-- Table Wrapper for AJAX -->
 <div id="subscribersTable">
@@ -41,31 +65,33 @@
 
 <!-- Add Subscriber Button -->
 <a href="@Url.Action("AddSubscriber", "Parking", new { parkingId = Model.Id })"
-   style="margin-top: 20px; display: inline-block; background-color: #1abc9c; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; text-decoration: none; transition: background-color 0.3s ease;"
+   style="margin-top: 10px; display: inline-block; background-color: #1abc9c; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; text-decoration: none; transition: background-color 0.3s ease;"
    onmouseover="this.style.backgroundColor='#16a085';"
    onmouseout="this.style.backgroundColor='#1abc9c';">
     Добави абонат
 </a>
 
 <!-- AJAX Script -->
-<script>
-    document.getElementById('searchForm').addEventListener('submit', function (e) {
-        e.preventDefault();
+@section Scripts {
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function (e) {
+            e.preventDefault();
 
-        const form = e.target;
-        const searchTerm = document.getElementById('searchTerm').value;
-        const parkingId = form.parkingId.value;
+            const form = e.target;
+            const searchTerm = document.getElementById('searchTerm').value;
+            const parkingId = form.parkingId.value;
 
-        fetch(`/Parking/SearchSubscribers?parkingId=${parkingId}&searchTerm=${encodeURIComponent(searchTerm)}`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('subscribersTable').innerHTML = html;
-        })
-        .catch(error => console.error('Error:', error));
-    });
-</script>
+            fetch(`/Parking/SearchSubscribers?parkingId=${parkingId}&searchTerm=${encodeURIComponent(searchTerm)}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('subscribersTable').innerHTML = html;
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
+}

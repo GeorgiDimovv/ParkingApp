@@ -23,8 +23,8 @@ namespace ParkingApp.Services
                 .Replace("{{SubscriberName}}", sub.Name)
                 //.Replace("{{SubscriberAddress}}", sub.Address ?? "—")
                 .Replace("{{SubscriberEmail}}", sub.EmailAddress)
-                .Replace("{{UnitPrice}}", $"{sub.TotalPriceInBgn:0.00}")
-                .Replace("{{TotalPrice}}", $"{sub.TotalPriceInBgn:0.00}");
+                .Replace("{{UnitPrice}}", $"{sub.PriceInBgn:0.00}")
+                .Replace("{{TotalPrice}}", $"{sub.PriceInBgn:0.00}");
                 //.Replace("{{FinalAmount}}", $"{sub.TotalPriceInBgn  1.20:0.00}");
         }
 

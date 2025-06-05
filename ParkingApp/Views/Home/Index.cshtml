@@ -2,8 +2,47 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 <h2>Информация за паркинги</h2>
+
+<div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
+
+    <form asp-action="ImportPaidSubscribersByNameFromExcel"
+          asp-controller="Parking"
+          method="post"
+          enctype="multipart/form-data"
+          style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px;">
+
+        <!-- File input -->
+        <label style="display: flex; align-items: center; gap: 10px; margin: 0;">
+            <input type="file"
+                   name="bankExcelFile"
+                   accept=".xlsx"
+                   required
+                   style="border: 1px solid #ccc;
+                      border-radius: 5px;
+                      padding: 5px;
+                      font-size: 14px;
+                      height: 36px;" />
+        </label>
+
+        <!-- Submit button -->
+        <button type="submit"
+                style="background-color: #1abc9c;
+                   color: #fff;
+                   padding: 8px 16px;
+                   border: none;
+                   border-radius: 5px;
+                   font-size: 14px;
+                   height: 36px;
+                   transition: background-color 0.3s ease;"
+                onmouseover="this.style.backgroundColor='#16a085';"
+                onmouseout="this.style.backgroundColor='#1abc9c';">
+            Импортирай плащания
+        </button>
+    </form>
+
+
+</div>
 
 <table class="table table-striped">
     <thead>
@@ -48,8 +87,10 @@
                           style="display:inline;">
                         <input type="hidden" name="id" value="@item.ParkingId" />
                         <button type="submit"
-                                style="width: 90px; background-color: #e74c3c; color: #fff; padding: 5px 0; border: none; border-radius: 5px; font-size: 14px;">
-                            Изтрии
+                                style="width: 90px; background-color: #e74c3c; color: #fff; padding: 5px 0; border: none; border-radius: 5px; font-size: 14px; transition: background-color 0.3s ease;"
+                                onmouseover="this.style.backgroundColor='#c0392b';"
+                                onmouseout="this.style.backgroundColor='#e74c3c';">
+                                Изтрии
                         </button>
                     </form>
                 </td>

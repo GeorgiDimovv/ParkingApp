@@ -25,20 +25,20 @@ namespace ParkingApp.Controllers
         {
             var parking = _DbContext.Parkings
                 .Include(p => p.Subscribers)
-                .FirstOrDefault(p => p.Id == id); // Get the parking with the given ID
+                .FirstOrDefault(p => p.Id == id);
 
             if (parking == null)
             {
                 return NotFound();
             }
 
-            return View(parking); // Pass data to the view
+            return View(parking);
         }
 
         [HttpGet]
         public IActionResult AddSubscriber(int parkingId)
         {
-            ViewBag.ParkingId = parkingId; // Pass parkingId to the view
+            ViewBag.ParkingId = parkingId;
             return View();
         }
 
@@ -84,8 +84,7 @@ namespace ParkingApp.Controllers
                 PaymentMethod = paymentMethod,
                 PriceInBgn = priceInBgn,
                 Paid = paid,
-                ParkingId = parkingId,
-                TotalPriceInBgn = priceInBgn
+                ParkingId = parkingId
             };
 
             _DbContext.Subscribers.Add(newSubscriber);
@@ -103,7 +102,7 @@ namespace ParkingApp.Controllers
         public IActionResult DeleteSubscriber(int subscriberId, int parkingId)
         {
             var subscriber = _DbContext.Subscribers
-                .FirstOrDefault(s => s.Id == subscriberId); // Find subscriber
+                .FirstOrDefault(s => s.Id == subscriberId);
 
             if (subscriber != null)
             {
@@ -138,17 +137,19 @@ namespace ParkingApp.Controllers
         [HttpPost]
         public IActionResult TogglePaid(int subscriberId, int parkingId)
         {
-            var subscriber = _DbContext.Subscribers.FirstOrDefault(s => s.Id == subscriberId); // Find subscriber
+            var subscriber = _DbContext.Subscribers
+                .FirstOrDefault(s => s.Id == subscriberId && s.ParkingId == parkingId);
+
             if (subscriber == null)
-            {
-                return NotFound();
-            }
+                return Json(new { success = false });
 
             subscriber.Paid = !subscriber.Paid;
             _DbContext.SaveChanges();
 
-            return RedirectToAction("Details", new { id = parkingId });
+            return Json(new { success = true, paid = subscriber.Paid });
         }
+
+
 
         // Shows the edit form for a specific subscriber
         public IActionResult EditSubscriber(int parkingId, int subscriberId)
@@ -166,7 +167,7 @@ namespace ParkingApp.Controllers
                 return NotFound();
 
             ViewBag.ParkingId = parkingId;
-            return View(subscriber); // Show form with subscriber info
+            return View(subscriber);
         }
 
         // Updates a subscriber’s details from the edit form
@@ -203,7 +204,6 @@ namespace ParkingApp.Controllers
             subscriber.BarrierPhoneNumbers = barrierPhoneNumbers.Split(",").Select(b => b.Trim()).ToList();
             subscriber.PaymentMethod = paymentMethod;
             subscriber.PriceInBgn = priceInBgn;
-            subscriber.TotalPriceInBgn = priceInBgn;
             subscriber.Paid = paid;
 
             _DbContext.SaveChanges();

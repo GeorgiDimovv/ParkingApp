@@ -1,12 +1,9 @@
 using DinkToPdf;
 using DinkToPdf.Contracts;
-using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using ParkingApp.Data;
 using ParkingApp.Services;
 using ParkingApp.Utilities;
-using System.Globalization;
 
 namespace ParkingApp
 {
