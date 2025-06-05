@@ -134,6 +134,7 @@
             }
 
         [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> ImportPaidSubscribersByNameFromExcel(IFormFile bankExcelFile)
         {
             ExcelPackage.License.SetNonCommercialOrganization("My Noncommercial organization");
@@ -145,7 +146,7 @@
             }
 
             var allSubscribers = await _dbContext.Subscribers.ToListAsync();
-            var matchedCounts = new Dictionary<int, int>(); // SubscriberId -> Count
+            var matchedCounts = new Dictionary<int, int>(); // SubscriberId -> Months paid
 
             using (var stream = new MemoryStream())
             {
@@ -157,7 +158,7 @@
                         int rowCount = worksheet.Dimension.Rows;
                         int colCount = worksheet.Dimension.Columns;
 
-                        for (int row = 1; row <= rowCount; row++)
+                        for (int row = 2; row <= rowCount; row++) // Skip header
                         {
                             string normalizedRow = string.Join(" ", Enumerable.Range(1, colCount)
                                 .Select(col => worksheet.Cells[row, col]?.Text?.Trim() ?? "")
@@ -165,8 +166,8 @@
 
                             foreach (var subscriber in allSubscribers)
                             {
-                                var nameParts = subscriber.Name.ToUpperInvariant().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                                if (nameParts.Length < 2)
+                                var nameParts = subscriber.Name?.ToUpperInvariant().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                if (nameParts == null || nameParts.Length < 2)
                                     continue;
 
                                 string firstName = nameParts[0];
@@ -174,8 +175,9 @@
 
                                 if (normalizedRow.Contains(firstName) && normalizedRow.Contains(lastName))
                                 {
-                                    // Try to extract a valid amount from the row
                                     decimal amountPaid = 0;
+
+                                    // Search for a decimal value from right to left
                                     for (int col = colCount; col >= 1; col--)
                                     {
                                         string cellValue = worksheet.Cells[row, col]?.Text?.Trim().Replace(" ", "").Replace(",", ".") ?? "";
@@ -187,7 +189,7 @@
                                     {
                                         decimal expectedPrice = subscriber.PriceInBgn;
 
-                                        if (amountPaid % expectedPrice == 0)
+                                        if (expectedPrice > 0 && amountPaid % expectedPrice == 0)
                                         {
                                             int monthsPaid = (int)(amountPaid / expectedPrice);
 
@@ -195,6 +197,12 @@
                                                 matchedCounts[subscriber.Id] = 0;
 
                                             matchedCounts[subscriber.Id] += monthsPaid;
+
+                                            Console.WriteLine($"✅ Match: {subscriber.Name} | Paid: {amountPaid} | Months: {monthsPaid}");
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine($"⚠️ Amount mismatch for {subscriber.Name}: Paid {amountPaid}, Expected {expectedPrice}");
                                         }
                                     }
                                 }
@@ -204,6 +212,7 @@
                 }
             }
 
+            // Apply updates to DB
             foreach (var kvp in matchedCounts)
             {
                 var subscriber = allSubscribers.First(s => s.Id == kvp.Key);
@@ -213,10 +222,11 @@
 
             await _dbContext.SaveChangesAsync();
 
-            TempData["Success"] = $"Намерени съвпадения за {matchedCounts.Count} абоната. Общ брой намерени редове: {matchedCounts.Values.Sum()}.";
+            TempData["Success"] = $"Намерени съвпадения за {matchedCounts.Count} абоната. Общ брой платени месеци: {matchedCounts.Values.Sum()}.";
 
             return RedirectToAction("Index");
         }
+
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
