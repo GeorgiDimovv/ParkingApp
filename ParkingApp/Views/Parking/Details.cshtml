@@ -3,7 +3,18 @@
 @{
     Layout = "_Layout";
 }
-
+@if (TempData["Success"] != null)
+{
+    <div id="toastMessage" class="toast success-toast">
+        @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div id="toastMessage" class="toast error-toast">
+        @TempData["Error"]
+    </div>
+}
 <h2>@Model.Location</h2>
 
 <!-- Search + Import Excel Row -->

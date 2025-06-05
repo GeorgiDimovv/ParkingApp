@@ -12,8 +12,8 @@ using ParkingApp.Data;
 namespace ParkingApp.Migrations
 {
     [DbContext(typeof(ParkingAppDbContext))]
-    [Migration("20250602190856_Update4")]
-    partial class Update4
+    [Migration("20250605225518_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -56,7 +56,15 @@ namespace ParkingApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BGBusinessName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.PrimitiveCollection<string>("BarrierPhoneNumbers")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ENGBusinessName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

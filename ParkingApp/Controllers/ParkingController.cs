@@ -44,7 +44,7 @@ namespace ParkingApp.Controllers
 
         // Adds a new subscriber to the database
         [HttpPost]
-        public IActionResult AddSubscriber(int parkingId, string spot, string name, string engBuisness, string bgBuisness, string email, string phoneNumbers, string barrierPhoneNumbers, PaymentMethod paymentMethod, decimal priceInBgn, bool paid)
+        public IActionResult AddSubscriber(int parkingId, string spot, string name, string engBusiness, string bgBusiness, string email, string phoneNumbers, string barrierPhoneNumbers, PaymentMethod paymentMethod, decimal priceInBgn, bool paid)
         {
             if (!ModelState.IsValid)
             {
@@ -76,8 +76,8 @@ namespace ParkingApp.Controllers
 
                 ParkingSpot = spot,
                 Name = name,
-                ENGBuisnessName = engBuisness,
-                BGBuisnessName = bgBuisness,
+                ENGBusinessName = engBusiness,
+                BGBusinessName = bgBusiness,
                 PhoneNumber = phoneList,
                 EmailAddress = email,
                 BarrierPhoneNumbers = barrierList,
@@ -172,7 +172,7 @@ namespace ParkingApp.Controllers
 
         // Updates a subscriber’s details from the edit form
         [HttpPost]
-        public IActionResult EditSubscriber(int parkingId, int subscriberId, string name, string engBuisness, string bgBuisness, string email, string phoneNumbers, string barrierPhoneNumbers, string spots, PaymentMethod paymentMethod, decimal priceInBgn, bool paid)
+        public IActionResult EditSubscriber(int parkingId, int subscriberId, string name, string engBusiness, string bgBusiness, string email, string phoneNumbers, string barrierPhoneNumbers, string spots, PaymentMethod paymentMethod, decimal priceInBgn, bool paid)
         {
             var parking = _DbContext.Parkings
                 .Include(p => p.Subscribers)
@@ -196,8 +196,8 @@ namespace ParkingApp.Controllers
 
             // Update properties
             subscriber.Name = name;
-            subscriber.ENGBuisnessName = engBuisness;
-            subscriber.BGBuisnessName = bgBuisness;
+            subscriber.ENGBusinessName = engBusiness;
+            subscriber.BGBusinessName = bgBusiness;
             subscriber.PhoneNumber = phoneNumbers.Split(",").Select(p => p.Trim()).ToList();
             subscriber.EmailAddress = email;
             subscriber.ParkingSpot = newSpot;
@@ -242,7 +242,7 @@ namespace ParkingApp.Controllers
                     int rowCount = worksheet.Dimension.Rows; // Get number of rows
 
                     // Loop through rows starting from 2 (assuming row 1 is headers)
-                    for (int row = 3; row <= rowCount; row++)
+                    for (int row = 2; row <= rowCount; row++)
                     {
                         string spot = worksheet.Cells[row, 1].Text;
                         string name = worksheet.Cells[row, 2].Text;
@@ -259,8 +259,8 @@ namespace ParkingApp.Controllers
                         {
                             ParkingSpot = spot,
                             Name = name,
-                            ENGBuisnessName = engBuisness,
-                            BGBuisnessName = bgBuisness,
+                            ENGBusinessName = engBuisness,
+                            BGBusinessName = bgBuisness,
                             PhoneNumber = new List<string> { phone },
                             BarrierPhoneNumbers = new List<string> { barrier },
                             PriceInBgn = decimal.TryParse(priceText, out var price) ? price : 0,

@@ -16,9 +16,9 @@ namespace ParkingApp.Data.Models
         public string Name { get; set; } = null!;
 
 
-        public string ENGBuisnessName { get; set; } = null!;
+        public string? ENGBusinessName { get; set; } = null!;
 
-        public string BGBuisnessName { get; set; } = null!;
+        public string? BGBusinessName { get; set; } = null!;
 
 
         [Required]

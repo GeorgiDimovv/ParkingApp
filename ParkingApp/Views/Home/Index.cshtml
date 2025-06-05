@@ -2,6 +2,18 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+@if (TempData["Success"] != null)
+{
+    <div id="toastMessage" class="toast success-toast">
+        @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div id="toastMessage" class="toast error-toast">
+        @TempData["Error"]
+    </div>
+}
 <h2>Информация за паркинги</h2>
 
 <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">

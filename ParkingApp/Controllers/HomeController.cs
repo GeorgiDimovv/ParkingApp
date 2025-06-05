@@ -19,7 +19,11 @@
                 _dbContext = dbContext;
             }
 
-            public async Task<IActionResult> Index()
+        public IActionResult Startup()
+        {
+            return View();
+        }
+        public async Task<IActionResult> Index()
             {
                 var billingMonth = DateTime.Now.ToString("yyyy-MM");
                 var nextCycle = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(1);
@@ -55,11 +59,6 @@
 
 
                 return View(summaries);
-            }
-
-            public IActionResult Startup()
-            {
-                return View();
             }
 
             public IActionResult LoadSidebar()
@@ -133,8 +132,6 @@
                 return RedirectToAction("Index"); // or whatever action loads the main view
             }
 
-        [HttpPost]
-        [HttpPost]
         public async Task<IActionResult> ImportPaidSubscribersByNameFromExcel(IFormFile bankExcelFile)
         {
             ExcelPackage.License.SetNonCommercialOrganization("My Noncommercial organization");
@@ -145,7 +142,10 @@
                 return RedirectToAction("Index");
             }
 
-            var allSubscribers = await _dbContext.Subscribers.ToListAsync();
+            var allParkings = await _dbContext.Parkings
+                .Include(p => p.Subscribers)
+                .ToListAsync();
+
             var matchedCounts = new Dictionary<int, int>(); // SubscriberId -> Months paid
 
             using (var stream = new MemoryStream())
@@ -156,68 +156,69 @@
                     foreach (var worksheet in package.Workbook.Worksheets)
                     {
                         int rowCount = worksheet.Dimension.Rows;
-                        int colCount = worksheet.Dimension.Columns;
 
                         for (int row = 2; row <= rowCount; row++) // Skip header
                         {
-                            string normalizedRow = string.Join(" ", Enumerable.Range(1, colCount)
-                                .Select(col => worksheet.Cells[row, col]?.Text?.Trim() ?? "")
-                                .ToArray()).ToUpperInvariant();
+                            string cellC = worksheet.Cells[row, 3]?.Text?.Trim().ToUpperInvariant() ?? "";
+                            string amountText = worksheet.Cells[row, 5]?.Text?.Trim().Replace(" ", "").Replace(",", ".") ?? "";
 
-                            foreach (var subscriber in allSubscribers)
+                            if (!decimal.TryParse(amountText, out decimal amountPaid) || amountPaid <= 0)
+                                continue;
+
+                            // Extract name from cellC — just first 3 words
+                            var namePartsFromExcel = cellC.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            string excelName = string.Join(" ", namePartsFromExcel.Take(3)).ToUpperInvariant();
+
+                            // Step 1: Find all matching subscribers
+                            var matchedSubscribers = allParkings
+                                .SelectMany(p => p.Subscribers)
+                                .Where(s =>
+                                {
+                                    var dbNameParts = s.Name?.ToUpperInvariant().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                    if (dbNameParts == null || dbNameParts.Length < 2) return false;
+
+                                    string firstName = dbNameParts[0];
+                                    string lastName = dbNameParts[^1];
+
+                                    return excelName.Contains(firstName) && excelName.Contains(lastName);
+                                })
+                                .ToList();
+
+                            if (matchedSubscribers.Count == 0)
+                                continue;
+
+                            // Step 2: Divide payment fairly among all matched subscriptions
+                            decimal splitAmount = amountPaid / matchedSubscribers.Count;
+
+                            foreach (var subscriber in matchedSubscribers)
                             {
-                                var nameParts = subscriber.Name?.ToUpperInvariant().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                                if (nameParts == null || nameParts.Length < 2)
+                                decimal expectedPrice = subscriber.PriceInBgn;
+                                if (expectedPrice <= 0)
                                     continue;
 
-                                string firstName = nameParts[0];
-                                string lastName = nameParts[^1];
+                                int monthsPaid = (int)(splitAmount / expectedPrice);
+                                if (monthsPaid > 0)
+                                    monthsPaid -= 1;
 
-                                if (normalizedRow.Contains(firstName) && normalizedRow.Contains(lastName))
-                                {
-                                    decimal amountPaid = 0;
+                                if (!matchedCounts.ContainsKey(subscriber.Id))
+                                    matchedCounts[subscriber.Id] = 0;
 
-                                    // Search for a decimal value from right to left
-                                    for (int col = colCount; col >= 1; col--)
-                                    {
-                                        string cellValue = worksheet.Cells[row, col]?.Text?.Trim().Replace(" ", "").Replace(",", ".") ?? "";
-                                        if (decimal.TryParse(cellValue, out amountPaid) && amountPaid > 0)
-                                            break;
-                                    }
-
-                                    if (amountPaid > 0)
-                                    {
-                                        decimal expectedPrice = subscriber.PriceInBgn;
-
-                                        if (expectedPrice > 0 && amountPaid % expectedPrice == 0)
-                                        {
-                                            int monthsPaid = (int)(amountPaid / expectedPrice);
-
-                                            if (!matchedCounts.ContainsKey(subscriber.Id))
-                                                matchedCounts[subscriber.Id] = 0;
-
-                                            matchedCounts[subscriber.Id] += monthsPaid;
-
-                                            Console.WriteLine($"✅ Match: {subscriber.Name} | Paid: {amountPaid} | Months: {monthsPaid}");
-                                        }
-                                        else
-                                        {
-                                            Console.WriteLine($"⚠️ Amount mismatch for {subscriber.Name}: Paid {amountPaid}, Expected {expectedPrice}");
-                                        }
-                                    }
-                                }
+                                matchedCounts[subscriber.Id] += monthsPaid;
                             }
                         }
                     }
                 }
             }
 
-            // Apply updates to DB
+            // Apply changes
             foreach (var kvp in matchedCounts)
             {
-                var subscriber = allSubscribers.First(s => s.Id == kvp.Key);
-                subscriber.Paid = true;
-                subscriber.MonthsPaidAhead += kvp.Value;
+                var subscriber = await _dbContext.Subscribers.FindAsync(kvp.Key);
+                if (subscriber != null)
+                {
+                    subscriber.Paid = true;
+                    subscriber.MonthsPaidAhead += kvp.Value;
+                }
             }
 
             await _dbContext.SaveChangesAsync();
@@ -226,6 +227,7 @@
 
             return RedirectToAction("Index");
         }
+
 
 
 

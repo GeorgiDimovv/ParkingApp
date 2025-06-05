@@ -53,16 +53,14 @@ namespace ParkingApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("BGBuisnessName")
-                        .IsRequired()
+                    b.Property<string>("BGBusinessName")
                         .HasColumnType("nvarchar(max)");
 
                     b.PrimitiveCollection<string>("BarrierPhoneNumbers")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ENGBuisnessName")
-                        .IsRequired()
+                    b.Property<string>("ENGBusinessName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailAddress")
